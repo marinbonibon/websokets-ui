@@ -27,8 +27,6 @@ wss.on('connection',  (ws: WebSocket) => {
                 if (!isUserExist) {
                     newUser.clientId = clientId;
                     userDataBase.push(newUser);
-                    //remove console.log
-                    console.log('userDataBase', userDataBase);
                     const regData = {
                         name: newUser.name,
                         index: userDataBase.indexOf(newUser),
@@ -36,6 +34,9 @@ wss.on('connection',  (ws: WebSocket) => {
                         errorText: ''
                     };
                     sendAnswer(type, regData, ws, id);
+                    [...clients.keys()].forEach((client) => {
+                        sendAnswer(REQUEST_TYPES.UPDATE_ROOM, roomDataBase, client, id);
+                    });
                 } else {
                     const regData:RegData = {
                         name: '',
@@ -70,4 +71,11 @@ wss.on('connection',  (ws: WebSocket) => {
     });
 
     ws.send(`WebSocketServer started on: ws://localhost:${WS_PORT}`);
+
+    ws.on('close', () => {
+        const clientId = clients.get(ws);
+        const userIndex: number = userDataBase.findIndex((user: User) => user.clientId === clientId);
+        userDataBase.splice(userIndex);
+        clients.delete(ws);
+    });
 });
