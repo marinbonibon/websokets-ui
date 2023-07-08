@@ -1,3 +1,5 @@
-import { User } from './types';
+import { UpdateRoomData, User } from '../types';
 
-export const dataBase: User[] = [];
+export const userDataBase: User[] = [];
+
+export const roomDataBase: UpdateRoomData[] = [];

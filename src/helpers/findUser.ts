@@ -1,5 +1,5 @@
-import { dataBase } from '../db';
+import { User, UserInfo } from '../types';
 
-export const findUser = (name: string) => {
-    return dataBase.find((user) => user.name === name);
+export const findUser = (db: Array<User|UserInfo>, name: string) => {
+    return db.find((user: User|UserInfo) => user.name === name);
 }
