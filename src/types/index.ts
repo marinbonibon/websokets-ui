@@ -1,7 +1,7 @@
 export interface User {
     name: string,
     password: string,
-    clientId?: string,
+    clientId?: { id: string },
 }
 
 export interface UserInfo {
@@ -25,6 +25,11 @@ export interface RegData {
 export interface UpdateRoomData {
     roomId: number,
     roomUsers: UserInfo[]
+}
+
+export interface CreateGameData {
+    idGame: number,
+    idPlayer: number
 }
 
 export enum REQUEST_TYPES {
