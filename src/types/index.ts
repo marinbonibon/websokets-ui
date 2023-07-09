@@ -1,7 +1,11 @@
+export interface ClientId {
+    id: string
+}
+
 export interface User {
     name: string,
     password: string,
-    clientId?: { id: string },
+    clientId?: ClientId,
 }
 
 export interface UserInfo {
