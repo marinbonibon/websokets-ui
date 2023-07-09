@@ -1,9 +1,9 @@
-import { roomDataBase, userDataBase } from '../db';
+import { gamesDataBase, roomDataBase, userDataBase } from '../db';
 import { CreateGameData, RESPONSE_TYPES, UpdateRoomData, UserInfo } from '../types';
 import { sendAnswer } from '../helpers/sendAnswer';
 
 export const addUserToRoom = (args: any) => {
-    const { data, player, roomCreators, gameClients, metadata, ws, id, clients} = args;
+    const { data, player, roomCreators, gameClients, metadata, ws, id, clients } = args;
     const playersAmount = 2;
     const parsedData = JSON.parse(data.toString());
     const {indexRoom} = parsedData;
@@ -37,6 +37,7 @@ export const addUserToRoom = (args: any) => {
         };
         sendAnswer(RESPONSE_TYPES.CREATE_GAME, createGameData, client, id);
     });
+    gamesDataBase.set(idGame, gameClientsArr);
     roomDataBase.splice(indexRoom, 1);
     gameClients.clear();
     [...clients.keys()].forEach((client) => {

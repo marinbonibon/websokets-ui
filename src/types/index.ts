@@ -36,6 +36,27 @@ export interface CreateGameData {
     idPlayer: number
 }
 
+export interface Ships {
+    position: {
+        x: number,
+        y: number,
+    },
+    direction: boolean,
+    length: number,
+    type: 'small'|'medium'|'large'|'huge',
+}
+
+export interface StartGameData {
+    ships: Ships[],
+    currentPlayerIndex: number
+}
+
+export interface AddShipsData {
+    gameId: string,
+    ships: Ships[],
+    indexPlayer: number
+}
+
 export enum REQUEST_TYPES {
     REG = 'reg',
     CREATE_ROOM = 'create_room',
