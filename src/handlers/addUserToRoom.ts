@@ -22,10 +22,6 @@ export const addUserToRoom = (args: any) => {
     if (room.roomUsers.length < playersAmount) {
         room.roomUsers.push(secondPlayer);
     }
-    const createGameData: CreateGameData = {
-        idGame,
-        idPlayer,
-    };
     // create map for 2 players and send them create game
     const host = userDataBase[firstPlayer.index];
     const hostId = [...roomCreators.keys()].find((clientId) => clientId === host?.clientId?.id);
@@ -33,7 +29,12 @@ export const addUserToRoom = (args: any) => {
     gameClients.set(hostId, hostClient);
     roomCreators.delete(hostId);
     gameClients.size < playersAmount && gameClients.set(metadata.id, ws);
-    [...gameClients.values()].forEach((client) => {
+    const gameClientsArr = [...gameClients.values()];
+    gameClientsArr.forEach((client) => {
+        const createGameData: CreateGameData = {
+            idGame,
+            idPlayer: gameClientsArr.indexOf(client),
+        };
         sendAnswer(RESPONSE_TYPES.CREATE_GAME, createGameData, client, id);
     });
     roomDataBase.splice(indexRoom, 1);
