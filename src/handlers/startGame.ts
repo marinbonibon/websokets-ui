@@ -1,16 +1,17 @@
-import { AddShipsData, RESPONSE_TYPES, StartGameData } from '../types';
-import { gamesDataBase } from '../db';
+import { PlayersData, RESPONSE_TYPES, StartGameData } from '../types';
 import { sendAnswer } from '../helpers/sendAnswer';
-import WebSocket from 'ws';
 
-export const startGame = (parsedData:AddShipsData, id:number) => {
-    const { gameId, ships, indexPlayer } = parsedData;
-    const gameClientsArr = gamesDataBase.get(gameId);
-    const startGameData:StartGameData = {
-        ships: ships,
-        currentPlayerIndex: indexPlayer
-    }
-    gameClientsArr.forEach((client: WebSocket) => {
-        sendAnswer(RESPONSE_TYPES.START_GAME, startGameData, client, id);
-    });
+export const startGame = (playersData:Array<PlayersData>, id:number) => {
+    playersData.forEach((player: PlayersData) => {
+        const startGameData:StartGameData = {
+            ships: player.ships,
+            currentPlayerIndex: player.indexPlayer
+        }
+        sendAnswer(RESPONSE_TYPES.START_GAME, startGameData, player.ws, id);
+
+        const turnData = {
+            currentPlayer: 0
+        };
+        sendAnswer(RESPONSE_TYPES.TURN, turnData, player.ws, id);
+    })
 }

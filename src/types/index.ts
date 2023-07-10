@@ -1,3 +1,5 @@
+import WebSocket from 'ws';
+
 export interface ClientId {
     id: string
 }
@@ -55,6 +57,12 @@ export interface AddShipsData {
     gameId: string,
     ships: Ships[],
     indexPlayer: number
+}
+
+export interface PlayersData {
+    ships: Ships[],
+    indexPlayer: number,
+    ws: WebSocket
 }
 
 export enum REQUEST_TYPES {

@@ -1,5 +1,5 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
-import { AddShipsData, REQUEST_TYPES, User } from '../types';
+import { AddShipsData, PlayersData, REQUEST_TYPES, User } from '../types';
 import { roomDataBase, userDataBase } from '../db';
 import { randomUUID } from 'crypto';
 import { registerUser } from '../handlers/registerUser';
@@ -13,7 +13,7 @@ const wss = new WebSocketServer({port: WS_PORT});
 const clients = new Map();
 const gameClients = new Map();
 const roomCreators = new Map();
-let playersIndexes: Array<number> = [];
+let playersData: Array<PlayersData> = [];
 
 wss.on('connection', (ws: WebSocket) => {
     const id = randomUUID();
@@ -49,11 +49,15 @@ wss.on('connection', (ws: WebSocket) => {
             case REQUEST_TYPES.ADD_SHIPS:
                 const playersAmount = 2;
                 const parsedMsg = JSON.parse(receivedMsg.toString());
-                const parsedData:AddShipsData = JSON.parse(parsedMsg.data);
-                playersIndexes.push(parsedData.indexPlayer);
-                if (playersIndexes.length !== playersAmount) return;
-                startGame(parsedData, id);
-                playersIndexes = [];
+                const parsedData: AddShipsData = JSON.parse(parsedMsg.data);
+                playersData.push({
+                    ships: parsedData.ships,
+                    indexPlayer: parsedData.indexPlayer,
+                    ws
+                });
+                if (playersData.length !== playersAmount) return;
+                startGame(playersData, id);
+                playersData = [];
                 break;
         }
     });
