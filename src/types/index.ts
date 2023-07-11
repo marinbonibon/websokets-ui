@@ -54,7 +54,7 @@ export interface StartGameData {
 }
 
 export interface AddShipsData {
-    gameId: string,
+    gameId: number,
     ships: Ships[],
     indexPlayer: number
 }
@@ -63,6 +63,24 @@ export interface PlayersData {
     ships: Ships[],
     indexPlayer: number,
     ws: WebSocket
+}
+
+export interface AttackData {
+    gameId: number,
+    x: number,
+    y: number,
+    indexPlayer: number
+}
+
+export interface Coords {
+    x: number,
+    y: number,
+}
+
+export interface Game {
+    roomId: number,
+    roomUsers: UserInfo[],
+    playersData: PlayersData[]
 }
 
 export enum REQUEST_TYPES {
@@ -83,4 +101,10 @@ export enum RESPONSE_TYPES {
     ATTACK = 'attack',
     TURN = 'turn',
     FINISH = 'finish'
+}
+
+export enum ATTACK_STATUSES {
+    SHOT = 'shot',
+    MISS = 'miss',
+    KILLED = 'killed'
 }
