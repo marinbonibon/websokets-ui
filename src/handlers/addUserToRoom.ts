@@ -8,14 +8,13 @@ export const addUserToRoom = (args: any) => {
     const parsedData = JSON.parse(data.toString());
     const {indexRoom} = parsedData;
     const room = roomDataBase.find((r: UpdateRoomData) => r.roomId === indexRoom);
-    if (!player) return;
+    if (!room) return;
+    const [firstPlayer] = room.roomUsers;
+    if (!player || !firstPlayer) return;
     const secondPlayer: UserInfo = {
         name: player.name,
         index: userDataBase.indexOf(player)
     };
-    if (!room) return;
-    const [firstPlayer] = room.roomUsers;
-    if (!firstPlayer) return;
     const idGame = firstPlayer.index;
     const idPlayer = userDataBase.indexOf(player);
     if (idGame === idPlayer) return;
@@ -30,17 +29,20 @@ export const addUserToRoom = (args: any) => {
     roomCreators.delete(hostId);
     gameClients.size < playersAmount && gameClients.set(metadata.id, ws);
     const gameClientsArr = [...gameClients.values()];
+    const clientsArr = [...clients.keys()];
     gameClientsArr.forEach((client) => {
         const createGameData: CreateGameData = {
             idGame,
-            idPlayer: gameClientsArr.indexOf(client),
+            idPlayer: clientsArr.indexOf(client),
         };
         sendAnswer(RESPONSE_TYPES.CREATE_GAME, createGameData, client, id);
     });
-    gamesDataBase.set(idGame, gameClientsArr);
+    // remove commented code
+    //gamesDataBase.set(idGame, gameClientsArr);
+    gamesDataBase.set(idGame, roomDataBase[indexRoom]);
     roomDataBase.splice(indexRoom, 1);
     gameClients.clear();
-    [...clients.keys()].forEach((client) => {
+    clientsArr.forEach((client) => {
         sendAnswer(RESPONSE_TYPES.UPDATE_ROOM, roomDataBase, client, id);
     });
 }

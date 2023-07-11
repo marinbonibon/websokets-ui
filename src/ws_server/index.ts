@@ -1,6 +1,6 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { AddShipsData, PlayersData, REQUEST_TYPES, User } from '../types';
-import { roomDataBase, userDataBase } from '../db';
+import { gamesDataBase, roomDataBase, userDataBase } from '../db';
 import { randomUUID } from 'crypto';
 import { registerUser } from '../handlers/registerUser';
 import { createRoom } from '../handlers/createRoom';
@@ -55,10 +55,14 @@ wss.on('connection', (ws: WebSocket) => {
                     indexPlayer: parsedData.indexPlayer,
                     ws
                 });
+                gamesDataBase.set(parsedData.gameId, {...gamesDataBase.get(parsedData.gameId), playersData})
                 if (playersData.length !== playersAmount) return;
-                startGame(playersData, id);
+                startGame(playersData, id, parsedData.gameId);
                 playersData = [];
                 break;
+            case REQUEST_TYPES.ATTACK:
+                break;
+
         }
     });
 
