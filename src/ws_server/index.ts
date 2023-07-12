@@ -1,5 +1,14 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
-import { AddShipsData, ATTACK_STATUSES, AttackData, Coords, Game, PlayersData, REQUEST_TYPES, User } from '../types';
+import {
+    AddShipsData,
+    ATTACK_STATUSES,
+    AttackData,
+    Coords,
+    Game,
+    PlayersData,
+    REQUEST_TYPES,
+    User
+} from '../types';
 import { gamesDataBase, roomDataBase, userDataBase } from '../db';
 import { randomUUID } from 'crypto';
 import { registerUser } from '../handlers/registerUser';
@@ -23,6 +32,22 @@ let secondPlayerHits: Array<Coords> = [];
 let game:Game;
 let firstPlayer: PlayersData | undefined;
 let secondPlayer: PlayersData | undefined;
+
+const handleAttack = (playerHits: Coords[], playerShips: Array<Array<Coords>> | undefined, attackData: AttackData, playerIndex: number | undefined, id: number) => {
+    const wasHitBefore = playerHits.find((coords:Coords) => coords.x === attackData.x && coords.y === attackData.y);
+    if (wasHitBefore) return;
+    const shotShip = playerShips?.map((ship: Coords[]) => {
+        const wreckedCoordinates = ship.find((coord: Coords) => coord.x === attackData.x && coord.y === attackData.y);
+        if (wreckedCoordinates) {
+            wreckedCoordinates.status = ATTACK_STATUSES.SHOT;
+            playerHits.push(wreckedCoordinates);
+            return ship;
+        } else {
+            playerHits.push({x: attackData.x, y: attackData.y, status: ATTACK_STATUSES.MISS});
+        }
+    }).filter((el: Coords[] | undefined) => el)[0];
+    attackEnemy(game.playersData, attackData, id, playerIndex, shotShip);
+}
 
 wss.on('connection', (ws: WebSocket) => {
     const id = randomUUID();
@@ -77,54 +102,11 @@ wss.on('connection', (ws: WebSocket) => {
                 const attackData: AttackData = JSON.parse(data);
                 const firstPlayerIndex = firstPlayer?.indexPlayer;
                 const secondPlayerIndex = secondPlayer?.indexPlayer;
-                let status = '';
 
                 if (firstPlayerIndex === attackData.indexPlayer) {
-                    const wasHitBefore = secondPlayerHits.find((coords:Coords) => coords.x === attackData.x && coords.y === attackData.y);
-                    if (wasHitBefore) return;
-                    const isHit = secondPlayerShips?.map((ship: Coords[]) => {
-                        const wreckedCoordinates = ship.find((coord: Coords) => coord.x === attackData.x && coord.y === attackData.y);
-                        if (wreckedCoordinates) {
-                            console.log('ship', ship);
-                            secondPlayerHits.push(wreckedCoordinates);
-                            ship.splice(ship.indexOf(wreckedCoordinates), 1);
-                            console.log('ship2', ship);
-                        }
-
-                        if (ship.length === 0) {
-                            status = ATTACK_STATUSES.KILLED;
-                            // @ts-ignore
-                            secondPlayerShips = secondPlayerShips?.filter((ship) => ship.length > 0);
-                        }
-                        return !!wreckedCoordinates;
-                    }).filter((el: boolean) => el)[0];
-                    if (!isHit) {
-                        secondPlayerHits.push({x: attackData.x, y: attackData.y});
-                    }
-                    attackEnemy(game.playersData, isHit, attackData, id, secondPlayerIndex, status);
-                }
-
-                if(secondPlayerIndex === attackData.indexPlayer) {
-                    const wasHitBefore = firstPlayerHits.find((coords:Coords) => coords.x === attackData.x && coords.y === attackData.y);
-                    if (wasHitBefore) return;
-                    const isHit = firstPlayerShips?.map((ship) => {
-                        const wreckedCoordinates = ship.find((coord) => coord.x === attackData.x && coord.y === attackData.y);
-                        if (wreckedCoordinates) {
-                            firstPlayerHits.push(wreckedCoordinates);
-                            ship.splice(ship.indexOf(wreckedCoordinates), 1);
-                        }
-
-                        if (ship.length === 0) {
-                            status = ATTACK_STATUSES.KILLED;
-                            // @ts-ignore
-                            firstPlayerShips = secondPlayerShips?.filter((ship) => ship.length > 0);
-                        }
-                        return !!wreckedCoordinates;
-                    }).filter((el: boolean) => el)[0];
-                    if (!isHit) {
-                        firstPlayerHits.push({x: attackData.x, y: attackData.y});
-                    }
-                    attackEnemy(game.playersData, isHit, attackData, id, firstPlayerIndex, status);
+                    handleAttack(secondPlayerHits, secondPlayerShips, attackData, secondPlayerIndex, id);
+                } else {
+                    handleAttack(firstPlayerHits, firstPlayerShips, attackData, firstPlayerIndex, id);
                 }
                 break;
 
