@@ -36,6 +36,7 @@ let secondPlayer: PlayersData | undefined;
 const handleAttack = (playerHits: Coords[], playerShips: Array<Array<Coords>> | undefined, attackData: AttackData, playerIndex: number | undefined, id: number) => {
     const wasHitBefore = playerHits.find((coords:Coords) => coords.x === attackData.x && coords.y === attackData.y);
     if (wasHitBefore) return;
+    const aroundShipCells: Coords[] = [];
     const shotShip = playerShips?.map((ship: Coords[]) => {
         const wreckedCoordinates = ship.find((coord: Coords) => coord.x === attackData.x && coord.y === attackData.y);
         if (wreckedCoordinates) {
@@ -46,7 +47,7 @@ const handleAttack = (playerHits: Coords[], playerShips: Array<Array<Coords>> | 
             playerHits.push({x: attackData.x, y: attackData.y, status: ATTACK_STATUSES.MISS});
         }
     }).filter((el: Coords[] | undefined) => el)[0];
-    attackEnemy(game.playersData, attackData, id, playerIndex, shotShip);
+    attackEnemy(game.playersData, attackData, id, playerIndex, shotShip, aroundShipCells, playerHits);
 }
 
 wss.on('connection', (ws: WebSocket) => {

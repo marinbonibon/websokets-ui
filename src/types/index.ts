@@ -75,7 +75,8 @@ export interface AttackData {
 export interface Coords {
     x: number,
     y: number,
-    status?: string
+    status?: string,
+    direction?: string
 }
 
 export interface Game {

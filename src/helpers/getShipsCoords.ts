@@ -7,12 +7,12 @@ export const getShipsCoords = (ships: Ships[]) => {
         if (!ship.direction) {
             for(let i = 0; i < ship.length; i++) {
                 const xCoords = ship.position.x < playFieldSize ? ship.position.x + i : ship.position.x;
-                shipCoordinates.push({x: xCoords, y: ship.position.y, status: ''});
+                shipCoordinates.push({x: xCoords, y: ship.position.y, status: '', direction: 'horizontal'});
             }
         } else {
             for(let i = 0; i < ship.length; i++) {
                 const yCoords = ship.position.y < playFieldSize ? ship.position.y + i : ship.position.y;
-                shipCoordinates.push({x: ship.position.x, y: yCoords, status: ''});
+                shipCoordinates.push({x: ship.position.x, y: yCoords, status: '', direction: 'vertical'});
             }
         }
         acc.push(shipCoordinates);
