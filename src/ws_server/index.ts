@@ -119,7 +119,6 @@ wss.on('connection', (ws: WebSocket) => {
     ws.on('close', () => {
         const clientId = clients.get(ws);
         const userIndex: number = userDataBase.findIndex((user: User) => user.clientId === clientId);
-        userDataBase.splice(userIndex, 1);
         const room = roomDataBase.find((r) => r.roomUsers[0]?.index === userIndex || r.roomUsers[1]?.index === userIndex);
         room && roomDataBase.splice(roomDataBase.indexOf(room), 1);
         clients.delete(ws);
