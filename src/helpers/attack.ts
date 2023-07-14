@@ -1,6 +1,6 @@
 import { ATTACK_STATUSES, AttackData, Coords, PlayersData, RESPONSE_TYPES } from '../types';
-import { sendAnswer } from '../helpers/sendAnswer';
-import { sendAttackAnswer } from '../helpers/sendAttackAnswer';
+import { sendAnswer } from './sendAnswer';
+import { sendAttackAnswer } from './sendAttackAnswer';
 
 export const attackEnemy = (playersData: PlayersData[], attackData: AttackData, id: number, playerIndex: number | undefined, shotShip: Coords[] | undefined, aroundShipCells: Coords[], playerHits: Coords[]) => {
     let responseStatus: string;

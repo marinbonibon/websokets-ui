@@ -72,6 +72,11 @@ export interface AttackData {
     indexPlayer: number
 }
 
+export interface RandomAttackData {
+    gameId: number,
+    indexPlayer: number
+}
+
 export interface Coords {
     x: number,
     y: number,

@@ -1,11 +1,10 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import {
     AddShipsData,
-    ATTACK_STATUSES,
     AttackData,
     Coords,
     Game,
-    PlayersData,
+    PlayersData, RandomAttackData,
     REQUEST_TYPES,
     User
 } from '../types';
@@ -15,8 +14,9 @@ import { registerUser } from '../handlers/registerUser';
 import { createRoom } from '../handlers/createRoom';
 import { addUserToRoom } from '../handlers/addUserToRoom';
 import { startGame } from '../handlers/startGame';
-import { attackEnemy } from '../handlers/attack';
 import { getShipsCoords } from '../helpers/getShipsCoords';
+import { handleAttack } from '../handlers/handleAttack';
+import { handleRandomAttack } from '../handlers/handleRandomAttack';
 
 const WS_PORT = 3000;
 
@@ -27,28 +27,14 @@ const roomCreators = new Map();
 let playersData: Array<PlayersData> = [];
 let firstPlayerShips: Array<Array<Coords>> | undefined = [];
 let secondPlayerShips: Array<Array<Coords>> | undefined = [];
-let firstPlayerHits:Array<Coords> = [];
+let firstPlayerHits: Array<Coords> = [];
 let secondPlayerHits: Array<Coords> = [];
-let game:Game;
+let game: Game;
 let firstPlayer: PlayersData | undefined;
 let secondPlayer: PlayersData | undefined;
+let firstPlayerIndex: number | undefined;
+let secondPlayerIndex: number | undefined;
 
-const handleAttack = (playerHits: Coords[], playerShips: Array<Array<Coords>> | undefined, attackData: AttackData, playerIndex: number | undefined, id: number) => {
-    const wasHitBefore = playerHits.find((coords:Coords) => coords.x === attackData.x && coords.y === attackData.y);
-    if (wasHitBefore) return;
-    const aroundShipCells: Coords[] = [];
-    const shotShip = playerShips?.map((ship: Coords[]) => {
-        const wreckedCoordinates = ship.find((coord: Coords) => coord.x === attackData.x && coord.y === attackData.y);
-        if (wreckedCoordinates) {
-            wreckedCoordinates.status = ATTACK_STATUSES.SHOT;
-            playerHits.push(wreckedCoordinates);
-            return ship;
-        } else {
-            playerHits.push({x: attackData.x, y: attackData.y, status: ATTACK_STATUSES.MISS});
-        }
-    }).filter((el: Coords[] | undefined) => el)[0];
-    attackEnemy(game.playersData, attackData, id, playerIndex, shotShip, aroundShipCells, playerHits);
-}
 
 wss.on('connection', (ws: WebSocket) => {
     const id = randomUUID();
@@ -101,16 +87,25 @@ wss.on('connection', (ws: WebSocket) => {
                 break;
             case REQUEST_TYPES.ATTACK:
                 const attackData: AttackData = JSON.parse(data);
-                const firstPlayerIndex = firstPlayer?.indexPlayer;
-                const secondPlayerIndex = secondPlayer?.indexPlayer;
+                firstPlayerIndex = firstPlayer?.indexPlayer;
+                secondPlayerIndex = secondPlayer?.indexPlayer;
 
                 if (firstPlayerIndex === attackData.indexPlayer) {
-                    handleAttack(secondPlayerHits, secondPlayerShips, attackData, secondPlayerIndex, id);
+                    handleAttack(secondPlayerHits, secondPlayerShips, attackData, secondPlayerIndex, id, game.playersData);
                 } else {
-                    handleAttack(firstPlayerHits, firstPlayerShips, attackData, firstPlayerIndex, id);
+                    handleAttack(firstPlayerHits, firstPlayerShips, attackData, firstPlayerIndex, id, game.playersData);
                 }
                 break;
-
+            case REQUEST_TYPES.RANDOM_ATTACK:
+                const randomAttackData: RandomAttackData = JSON.parse(data);
+                if (firstPlayerIndex === randomAttackData.indexPlayer) {
+                    handleRandomAttack(secondPlayerHits, secondPlayerShips, randomAttackData, secondPlayerIndex, id, game.playersData);
+                } else {
+                    handleRandomAttack(firstPlayerHits, firstPlayerShips, randomAttackData, firstPlayerIndex, id, game.playersData)
+                }
+                break;
+            default:
+                console.log('Can not find anything');
         }
     });
 
