@@ -17,6 +17,7 @@ import { startGame } from '../handlers/startGame';
 import { getShipsCoords } from '../helpers/getShipsCoords';
 import { handleAttack } from '../handlers/handleAttack';
 import { handleRandomAttack } from '../handlers/handleRandomAttack';
+import { finishGame } from '../handlers/finishGame';
 
 const WS_PORT = 3000;
 
@@ -34,6 +35,20 @@ let firstPlayer: PlayersData | undefined;
 let secondPlayer: PlayersData | undefined;
 let firstPlayerIndex: number | undefined;
 let secondPlayerIndex: number | undefined;
+
+const clearGame = (gameId: number | undefined) => {
+    gameClients.clear();
+    playersData = [];
+    firstPlayerShips = [];
+    secondPlayerShips = [];
+    firstPlayerHits = [];
+    secondPlayerHits = [];
+    firstPlayer = undefined;
+    secondPlayer = undefined;
+    firstPlayerIndex = undefined;
+    secondPlayerIndex = undefined;
+    gamesDataBase.delete(gameId);
+}
 
 
 wss.on('connection', (ws: WebSocket) => {
@@ -92,8 +107,10 @@ wss.on('connection', (ws: WebSocket) => {
 
                 if (firstPlayerIndex === attackData.indexPlayer) {
                     handleAttack(secondPlayerHits, secondPlayerShips, attackData, secondPlayerIndex, id, game.playersData);
+                    finishGame(secondPlayerShips, firstPlayerIndex, id, game.playersData, clearGame, attackData.gameId);
                 } else {
                     handleAttack(firstPlayerHits, firstPlayerShips, attackData, firstPlayerIndex, id, game.playersData);
+                    finishGame(firstPlayerShips, secondPlayerIndex, id, game.playersData, clearGame, attackData.gameId);
                 }
                 break;
             case REQUEST_TYPES.RANDOM_ATTACK:

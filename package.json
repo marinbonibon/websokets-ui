@@ -6,13 +6,14 @@
     "scripts": {
         "start": "node index.ts",
         "start:dev": "nodemon index.ts",
+        "start:ws": "ts-node src/ws_server/index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
-        "@types/node": "^20.4.0",
+        "@types/node": "^20.4.2",
         "@types/ws": "^8.5.5",
         "nodemon": "^2.0.16",
         "typescript": "^5.1.6"

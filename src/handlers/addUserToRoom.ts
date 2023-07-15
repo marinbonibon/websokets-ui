@@ -37,8 +37,6 @@ export const addUserToRoom = (args: any) => {
         };
         sendAnswer(RESPONSE_TYPES.CREATE_GAME, createGameData, client, id);
     });
-    // remove commented code
-    //gamesDataBase.set(idGame, gameClientsArr);
     gamesDataBase.set(idGame, roomDataBase[indexRoom]);
     roomDataBase.splice(indexRoom, 1);
     gameClients.clear();

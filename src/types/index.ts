@@ -90,6 +90,10 @@ export interface Game {
     playersData: PlayersData[]
 }
 
+export interface FinishData {
+    winPlayer: number | undefined
+}
+
 export enum REQUEST_TYPES {
     REG = 'reg',
     CREATE_ROOM = 'create_room',
